@@ -34,7 +34,6 @@ task genJaxb {
             mkdir(dir: classesDir)
 
             xjc(destdir: sourcesDir, schema: schema, binding: "src/main/resources/xsd/Extract/0.9/binding.xjb") {
-                //arg(value: "-wsdl")
                 arg(value: "-extension")
                 produces(dir: sourcesDir, includes: "**/*.java")
             }
@@ -62,6 +61,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'javax.xml.bind:jaxb-api:2.3.1'
     implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.1'    
+    implementation 'org.springframework:spring-oxm:5.1.6.RELEASE'
     compile group: 'org.locationtech.jts', name: 'jts-core', version: '1.16.1'
     compile group: 'org.locationtech.jts', name: 'jts-io', version: '1.16.1', ext: 'pom'
     jaxb("org.glassfish.jaxb:jaxb-xjc:2.3.2")
