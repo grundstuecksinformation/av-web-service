@@ -3,6 +3,7 @@ package ch.so.agi.cadastre.webservice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -12,9 +13,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import ch.so.geo.schema.agi.cadastre._0_9.extract.GetEGRIDResponse;
 import ch.so.geo.schema.agi.cadastre._0_9.extract.RealEstateType;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,6 +46,7 @@ import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.WKBWriter;
 import org.slf4j.Logger;
 
+//@RestController
 @Controller
 public class MainController {
     private final Logger logger = org.slf4j.LoggerFactory.getLogger(this.getClass());
@@ -87,8 +96,55 @@ public class MainController {
     public ResponseEntity<String>  ping() {
         return new ResponseEntity<String>("cadastre web service",HttpStatus.OK);
     }
+    
+    @GetMapping("/getegrid/{format}/{identdn:[a-zA-Z].{2,11}}/{number}")
+    public ResponseEntity<GetEGRIDResponse> getEgridByNumber(@PathVariable String format, @PathVariable String identdn,
+            @PathVariable String number) {
+        if (!format.equals(PARAM_FORMAT_XML)) {
+            throw new IllegalArgumentException("unsupported format <" + format + ">");
+        }
+        GetEGRIDResponse ret = new GetEGRIDResponse();
+        List<JAXBElement<?>[]> gsList=jdbcTemplate.query(
+                "SELECT egris_egrid,nummer,g.nbident,g.art,TO_CHAR(nf.gueltigereintrag, 'yyyy-mm-dd') gueltigereintrag,TO_CHAR(nf.gbeintrag, 'yyyy-mm-dd') gbeintrag,ST_AsText(geometrie) FROM " +getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_LSNACHFUEHRUNG + " nf"
+                        + " LEFT JOIN "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_GRUNDSTUECK+" g ON g.entstehung = nf.t_id"
+                        +" LEFT JOIN (SELECT liegenschaft_von as von, geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_LIEGENSCHAFT
+                         +" UNION ALL SELECT selbstrecht_von as von,  geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_SELBSTRECHT
+                         +" UNION ALL SELECT bergwerk_von as von,     geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_BERGWERK+") b ON b.von=g.t_id WHERE g.nummer=? AND g.nbident=?"
+                 , new RowMapper<JAXBElement<?>[]>() {
+                    @Override
+                    public JAXBElement<?>[] mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        JAXBElement<?> ret[]=new JAXBElement[6];
+                        ret[0]=new JAXBElement<String>(new QName(extractNS,"Egrid"),String.class,rs.getString(1));
+                        ret[1]=new JAXBElement<String>(new QName(extractNS,"Number"),String.class,rs.getString(2));
+                        ret[2]=new JAXBElement<String>(new QName(extractNS,"IdentND"),String.class,rs.getString(3));
+                        ret[3]=new JAXBElement<RealEstateType>(new QName(extractNS,"Type"),RealEstateType.class,gsArtLookUp(rs.getString(4)));
+                        String sqlDate = (rs.getString(6) != null) ? rs.getString(6) : rs.getString(5);
+                        ret[4]=new JAXBElement<XMLGregorianCalendar>(new QName(extractNS,"StateOf"),XMLGregorianCalendar.class,stringDateToXmlGregorianCalendar(sqlDate));
+                        ret[5]=new JAXBElement<String>(new QName(extractNS,"Limit"),String.class,rs.getString(7));
+                        return ret;
+                    }
+                }, number, identdn);
 
-    @GetMapping("/getegrid/{format}")
+        for (JAXBElement<?>[] gs : gsList) {
+            ret.getEgridsAndLimitsAndStateOves().add(gs[0]);
+            ret.getEgridsAndLimitsAndStateOves().add(gs[1]);
+            ret.getEgridsAndLimitsAndStateOves().add(gs[2]);
+            ret.getEgridsAndLimitsAndStateOves().add(gs[3]);            
+            ret.getEgridsAndLimitsAndStateOves().add(gs[4]);
+            ret.getEgridsAndLimitsAndStateOves().add(gs[5]);
+        }
+        return new ResponseEntity<GetEGRIDResponse>(ret,gsList.size()>0?HttpStatus.OK:HttpStatus.NO_CONTENT);
+    }
+
+    /*
+    @Operation(summary = "Find egrid by XY", description = "Liste der Grundstücke", tags = { "contact_egrid_egrid_wasn_da? (tags)" })
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "OK, Antwort konnte erstellt werden", content = @Content(schema = @Schema(implementation = GetEGRIDResponse.class))),
+        @ApiResponse(responseCode = "204", description = "Kein Grundstück gefunden"), 
+        @ApiResponse(responseCode = "500", description = "Andere Fehler") 
+    })
+    */
+    @GetMapping(value="/getegrid/{format}", produces=MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<GetEGRIDResponse> getEgridByXY(@PathVariable String format,
             @RequestParam(value = "XY", required = false) String xy,
             @RequestParam(value = "GNSS", required = false) String gnss) {
@@ -125,8 +181,8 @@ public class MainController {
                 "SELECT egris_egrid,nummer,g.nbident,g.art,TO_CHAR(nf.gueltigereintrag, 'yyyy-mm-dd') gueltigereintrag,TO_CHAR(nf.gbeintrag, 'yyyy-mm-dd') gbeintrag,ST_AsText(geometrie) FROM " +getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_LSNACHFUEHRUNG + " nf"
                         + " LEFT JOIN "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_GRUNDSTUECK+" g ON g.entstehung = nf.t_id"
                         +" LEFT JOIN (SELECT liegenschaft_von as von, geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_LIEGENSCHAFT
-                             +" UNION SELECT selbstrecht_von as von,  geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_SELBSTRECHT
-                             +" UNION SELECT bergwerk_von as von,     geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_BERGWERK+") b ON b.von=g.t_id WHERE ST_DWithin(ST_Transform(?,2056),b.geometrie,1.0)"
+                         +" UNION ALL SELECT selbstrecht_von as von,  geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_SELBSTRECHT
+                         +" UNION ALL SELECT bergwerk_von as von,     geometrie FROM "+getSchema()+"."+TABLE_DM01VCH24LV95DLIEGENSCHAFTEN_BERGWERK+") b ON b.von=g.t_id WHERE ST_DWithin(ST_Transform(?,2056),b.geometrie,1.0)"
                 , new RowMapper<JAXBElement<?>[]>() {
                     @Override
                     public JAXBElement<?>[] mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -135,13 +191,8 @@ public class MainController {
                         ret[1]=new JAXBElement<String>(new QName(extractNS,"Number"),String.class,rs.getString(2));
                         ret[2]=new JAXBElement<String>(new QName(extractNS,"IdentND"),String.class,rs.getString(3));
                         ret[3]=new JAXBElement<RealEstateType>(new QName(extractNS,"Type"),RealEstateType.class,gsArtLookUp(rs.getString(4)));
-                        
-                        String sqlDate = rs.getString(6);
-                        if (sqlDate == null) {
-                            sqlDate = rs.getString(5); // TODO: Kein GB-Eintrag -> GueltigerEintrag verwenden.
-                        }
+                        String sqlDate = (rs.getString(6) != null) ? rs.getString(6) : rs.getString(5);
                         ret[4]=new JAXBElement<XMLGregorianCalendar>(new QName(extractNS,"StateOf"),XMLGregorianCalendar.class,stringDateToXmlGregorianCalendar(sqlDate));
-                        
                         ret[5]=new JAXBElement<String>(new QName(extractNS,"Limit"),String.class,rs.getString(7));
                         return ret;
                     }
