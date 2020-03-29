@@ -140,13 +140,13 @@
     </xsd:complexType>
 
     <xsd:complexType name="GetEGRIDResponseType">
-    	<xsd:sequence minOccurs="0">
-    		<xsd:element name="Egrid" type="xsd:token" minOccurs="0" maxOccurs="1"></xsd:element>
-    		<xsd:element name="Number" type="xsd:token" minOccurs="1" maxOccurs="1"></xsd:element>
-    		<xsd:element name="IdentND" type="xsd:token" minOccurs="1" maxOccurs="1"></xsd:element>
-    		<xsd:element name="Type" type="extract:RealEstateType" minOccurs="1" maxOccurs="1"></xsd:element>
-    		<xsd:element name="StateOf" type="xsd:date" minOccurs="1" maxOccurs="1"></xsd:element>
-    		<xsd:element name="Limit" type="xsd:normalizedString" minOccurs="1" maxOccurs="1"></xsd:element>
+    	<xsd:sequence minOccurs="0" maxOccurs="unbounded">
+    		<xsd:element name="Egrid" type="xsd:token"></xsd:element>
+    		<xsd:element name="Number" type="xsd:token"></xsd:element>
+    		<xsd:element name="IdentND" type="xsd:token"></xsd:element>
+    		<xsd:element name="Type" type="extract:RealEstateType"></xsd:element>
+    		<xsd:element name="StateOf" type="xsd:date"></xsd:element>
+    		<xsd:element name="Limit" type="xsd:normalizedString"></xsd:element>
     	</xsd:sequence>
     </xsd:complexType>
 
