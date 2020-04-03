@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'ch.so.agi'
-sourceCompatibility = '11'
+sourceCompatibility = '8'
 
 configurations {
     jaxb
@@ -38,7 +38,7 @@ task genJaxb {
                 produces(dir: sourcesDir, includes: "**/*.java")
             }
 
-            javac(destdir: classesDir, source: 11, target: 11, debug: true,
+            javac(destdir: classesDir, source: 8, target: 8, debug: true,
                     debugLevel: "lines,vars,source", includeantruntime: false,
                     classpath: configurations.jaxb.asPath) {
                 src(path: sourcesDir)

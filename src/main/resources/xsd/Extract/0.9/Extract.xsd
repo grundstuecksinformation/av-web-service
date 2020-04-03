@@ -34,12 +34,7 @@
         			</xsd:restriction>
         		</xsd:simpleType>
         	</xsd:element>
-        	<xsd:element name="PostalCode" minOccurs="0">
-        		<xsd:simpleType>
-        			<xsd:restriction base="xsd:normalizedString">
-        				<xsd:minLength value="4"></xsd:minLength>
-        			</xsd:restriction>
-        		</xsd:simpleType>
+        	<xsd:element name="PostalCode" minOccurs="0" type="xsd:int">
         	</xsd:element>
         	<xsd:element name="City" minOccurs="0">
         		<xsd:simpleType>
@@ -84,8 +79,8 @@
     				</xsd:restriction>
     			</xsd:simpleType>
     		</xsd:element>
-    		<xsd:element name="LocalNames" type="xsd:normalizedString"
-    			minOccurs="0">
+    		<xsd:element name="LocalNames" type="extract:LocalNameType"
+    			minOccurs="0" maxOccurs="unbounded">
     		</xsd:element>
     		<xsd:element name="LandCoverShare"
     			type="extract:LandCoverShareType" minOccurs="0"
@@ -133,9 +128,22 @@
 
     <xsd:complexType name="BuildingType">
     	<xsd:sequence>
-    		<xsd:element name="Egid" type="xsd:int" minOccurs="0" maxOccurs="1"></xsd:element>
-    		<xsd:element name="Edid" type="xsd:int" minOccurs="0" maxOccurs="1"></xsd:element>
-    		<xsd:element name="PostalAddress" type="extract:AddressType" minOccurs="0" maxOccurs="1"></xsd:element>
+    		<xsd:element name="Egid" type="xsd:int" minOccurs="0"
+    			maxOccurs="1">
+    		</xsd:element>
+    		<xsd:element name="planned" type="xsd:boolean" minOccurs="1"
+    			maxOccurs="1">
+    		</xsd:element>
+    		<xsd:element name="undergroundStructure" type="xsd:boolean"
+    			minOccurs="1" maxOccurs="1">
+    		</xsd:element>
+    		<xsd:element name="Area" type="xsd:double" minOccurs="0"
+    			maxOccurs="1">
+    		</xsd:element>
+    		<xsd:element name="AreaShare" type="xsd:double"
+    			minOccurs="0" maxOccurs="1">
+    		</xsd:element>
+    		<xsd:element name="BuildingEntry" type="extract:BuildingEntryType" minOccurs="0" maxOccurs="unbounded"></xsd:element>
     	</xsd:sequence>
     </xsd:complexType>
 
@@ -168,13 +176,28 @@
 
 	<xsd:complexType name="OrganisationType">
 		<xsd:sequence>
-			<xsd:element name="Person" type="extract:PersonAddressType" minOccurs="0"></xsd:element>
-            <xsd:element name="Line1" type="xsd:normalizedString" minOccurs="0" maxOccurs="1"></xsd:element>
-            <xsd:element name="Line2" type="xsd:normalizedString" minOccurs="0" maxOccurs="1"></xsd:element>
-            <xsd:element name="Address" type="extract:AddressType" minOccurs="0" maxOccurs="1"></xsd:element>
-            <xsd:element name="Phone" type="xsd:normalizedString" minOccurs="0" maxOccurs="1"></xsd:element>
-            <xsd:element name="Email" type="xsd:normalizedString" minOccurs="0" maxOccurs="1"></xsd:element>
-            <xsd:element name="Web" type="xsd:anyURI" minOccurs="0" maxOccurs="1"></xsd:element>           
+			<xsd:element name="Person" type="extract:PersonAddressType"
+				minOccurs="0">
+			</xsd:element>
+			<xsd:element name="Line1" type="xsd:normalizedString"
+				minOccurs="0" maxOccurs="1">
+			</xsd:element>
+			<xsd:element name="Line2" type="xsd:normalizedString"
+				minOccurs="0" maxOccurs="1">
+			</xsd:element>
+			<xsd:element name="Address" type="extract:AddressType"
+				minOccurs="0" maxOccurs="1">
+			</xsd:element>
+			<xsd:element name="Phone" type="xsd:normalizedString"
+				minOccurs="0" maxOccurs="1">
+			</xsd:element>
+			<xsd:element name="Email" type="xsd:normalizedString"
+				minOccurs="0" maxOccurs="1">
+			</xsd:element>
+			<xsd:element name="Web" type="xsd:anyURI" minOccurs="0"
+				maxOccurs="1">
+			</xsd:element>
+			<xsd:element name="Name" type="xsd:normalizedString" minOccurs="0" maxOccurs="1"></xsd:element>
 		</xsd:sequence>
 	</xsd:complexType>
 
@@ -251,6 +274,30 @@
   			minOccurs="1" maxOccurs="1">
   		</xsd:element>
   		<xsd:element name="max_NS95" type="xsd:normalizedString" minOccurs="1" maxOccurs="1"></xsd:element>
+  	</xsd:sequence>
+  </xsd:complexType>
+  
+  <xsd:complexType name="LocalNameType">
+    <xsd:sequence>
+      <xsd:element name="Name">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:normalizedString">
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  
+
+  <xsd:complexType name="BuildingEntryType">
+  	<xsd:sequence>
+  		<xsd:element name="Edid" type="xsd:int" minOccurs="0"
+  			maxOccurs="1">
+  		</xsd:element>
+  		<xsd:element name="PostalAddress" type="extract:AddressType"
+  			minOccurs="0" maxOccurs="1">
+  		</xsd:element>
+  		<xsd:element name="Egid" type="xsd:int" minOccurs="0" maxOccurs="1"></xsd:element>
   	</xsd:sequence>
   </xsd:complexType>
 </xsd:schema>

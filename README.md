@@ -16,6 +16,8 @@ curl -X GET -H "Accept: application/xml" -H "Content-Type: application/xml" http
 
 curl -X GET -H "Accept: application/xml" -H "Content-Type: application/xml" http://localhost:8080/getegrid/xml/SO0200002457/452/ > response.xml && xmllint --format response.xml
 
+
+curl -X GET -H "Accept: application/xml" -H "Content-Type: application/xml" http://localhost:8080/extract/xml/geometry/CH955832730623 > response.xml && xmllint --format response.xml
 ```
 
 
