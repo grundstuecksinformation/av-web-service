@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.deser.std.NumberDeserializers.IntegerDeserializer;
-
 import ch.so.geo.schema.agi.cadastre._0_9.extract.AddressType;
 import ch.so.geo.schema.agi.cadastre._0_9.extract.BuildingEntryType;
 import ch.so.geo.schema.agi.cadastre._0_9.extract.BuildingType;
@@ -39,12 +37,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.Base64;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -288,7 +284,7 @@ public class MainController {
         setBodenbedeckung(realEstate, parcel.getGeometrie());
         setGebaeude(realEstate, parcel.getGeometrie());
         setNfGeometerAddress(realEstate, parcel.getBfsnr());
-        setGrundbuchamtAddress(realEstate, parcel.getBfsnr());
+        setGrundbuchamtAddress(realEstate, parcel.getGbSubKreisNummer());
         setVermessungsaufsichtAddress(realEstate);
         
         extract.setRealEstate(realEstate);
@@ -316,7 +312,7 @@ public class MainController {
 	
 	private void setGrundbuchamtAddress(RealEstateDPR realEstate, int fosnr) {
 		String stmt = "SELECT amt, amtschreiberei, strasse, hausnummer, plz, ortschaft, telefon, email, web, bfsnr FROM "+getSchema()+"."+TABLE_SO_G_V_0180822GRUNDBUCHKREISE_GRUNDBUCHKREIS
-				+ " WHERE bfsnr = ?";
+				+ " WHERE grundbuchkreis_bfsnr = ?";
         Map<String,Object> orgMap = jdbcTemplate.queryForMap(stmt, fosnr);
         OrganisationType organisation = new OrganisationType();
         organisation.setName((String) orgMap.get("amtschreiberei")); 
@@ -654,7 +650,7 @@ public class MainController {
                     " LEFT JOIN "+getSchema()+"."+TABLE_DM01VCH24LV95DGEMEINDEGRENZEN_GEMEINDE+" AS gem ON gem.bfsnr = gb.bfsnr" +
                     " WHERE nbident=?", gs.getNbident());
             gs.setGbSubKreis((String) gbKreis.get("aname"));
-            gs.setGbSubKreisNummer(String.valueOf(gbKreis.get("grundbuchkreis_bfsnr")));
+            gs.setGbSubKreisNummer((int) gbKreis.get("grundbuchkreis_bfsnr"));
             gs.setBfsnr((Integer) gbKreis.get("bfsnr"));
             gs.setGemeinde((String) gbKreis.get("gemeindename"));
         } catch(EmptyResultDataAccessException ex) {

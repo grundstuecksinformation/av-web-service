@@ -13,7 +13,7 @@ public class Grundstueck {
     private String gemeinde;
     private String kanton;
     private String gbSubKreis;
-    private String gbSubKreisNummer;
+    private int gbSubKreisNummer;
     private String grundbuchamt;
 	public String getEgrid() {
 		return egrid;
@@ -75,10 +75,10 @@ public class Grundstueck {
 	public void setGbSubKreis(String gbSubKreis) {
 		this.gbSubKreis = gbSubKreis;
 	}
-	public String getGbSubKreisNummer() {
+	public int getGbSubKreisNummer() {
 		return gbSubKreisNummer;
 	}
-	public void setGbSubKreisNummer(String gbSubKreisNummer) {
+	public void setGbSubKreisNummer(int gbSubKreisNummer) {
 		this.gbSubKreisNummer = gbSubKreisNummer;
 	}
 	public String getGrundbuchamt() {
