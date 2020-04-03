@@ -4,6 +4,8 @@ plugins {
     id 'java'
 }
 
+apply from: "gradle/versioning.gradle"
+
 group = 'ch.so.agi'
 sourceCompatibility = '8'
 

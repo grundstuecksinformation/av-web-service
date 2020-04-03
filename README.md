@@ -20,4 +20,22 @@ curl -X GET -H "Accept: application/xml" -H "Content-Type: application/xml" http
 curl -X GET -H "Accept: application/xml" -H "Content-Type: application/xml" http://localhost:8080/extract/xml/geometry/CH955832730623 > response.xml && xmllint --format response.xml
 ```
 
+## Building
 
+### Docker
+
+```
+docker build -t sogis/cadastre-web-service .
+```
+
+## Running
+
+```
+docker run -p8080:8080 -e DBURL=jdbc:postgresql://localhost:54321/grundstuecksinformation -e DBUSR=gretl -e DBPWD=gretl -e DBSCHEMA=live sogis/cadastre-web-service
+
+docker run -p8080:8080 -e DBURL=jdbc:postgresql://host.docker.internal:54321/grundstuecksinformation -e DBUSR=gretl -e DBPWD=gretl -e DBSCHEMA=live sogis/cadastre-web-service
+```
+
+```
+
+```
