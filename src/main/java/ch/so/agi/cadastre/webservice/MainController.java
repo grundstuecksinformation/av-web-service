@@ -287,14 +287,14 @@ public class MainController {
                 File file = resource.getFile();      
                 byte[] targetArray = new byte[input.available()];
                 input.read(targetArray);
-                extract.setLogoGrunstuecksinformation(targetArray);
+                extract.setLogoGrundstuecksinformation(targetArray);
             } catch (IOException e) {
                 e.printStackTrace();
             }
             extract.setCantonalLogo(getImage("ch."+parcel.getNbident().substring(0, 2).toLowerCase()));
             extract.setMunicipalityLogo(getImage("ch."+String.valueOf(parcel.getBfsnr())));
         } else {
-            extract.setLogoGrunstuecksinformationRef(ServletUriComponentsBuilder.fromCurrentContextPath().pathSegment("logo-grundstuecksinformation.png").build().toUriString()); // TODO: dpi (and database stored)
+            extract.setLogoGrundstuecksinformationRef(ServletUriComponentsBuilder.fromCurrentContextPath().pathSegment("logo-grundstuecksinformation.png").build().toUriString()); // TODO: dpi (and database stored)
             extract.setCantonalLogoRef(getLogoRef("ch."+parcel.getNbident().substring(0, 2).toLowerCase()));
             extract.setMunicipalityLogoRef(getLogoRef("ch."+String.valueOf(parcel.getBfsnr())));
         }
