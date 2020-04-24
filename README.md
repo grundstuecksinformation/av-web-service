@@ -17,6 +17,14 @@ curl -X GET -H "Accept: application/xml" -H "Content-Type: application/xml" http
 curl -X GET -H "Accept: application/xml" -H "Content-Type: application/xml" http://localhost:8080/extract/xml/geometry/CH955832730623 > response.xml && xmllint --format response.xml
 ```
 
+### xml2pdf 
+
+```
+java -jar /Users/stefan/apps/SaxonHE9-9-1-7J/saxon9he.jar -s:src/test/data/CH310663327779.xml -xsl:src/main/resources/xml2pdf.xslt -o:/Users/stefan/tmp/CH310663327779.fo
+/Users/stefan/apps/fop-2.4/fop/fop -fo /Users/stefan/tmp/CH310663327779.fo -pdf /Users/stefan/tmp/CH310663327779.pdf -c src/main/resources/fop.xconf
+```
+
+
 ## Building
 
 ### Docker
