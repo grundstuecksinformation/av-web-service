@@ -108,7 +108,7 @@
 					</xsd:restriction>
 				</xsd:simpleType>
 			</xsd:element>
-			<xsd:element name="LocalNames"
+			<xsd:element name="LocalName"
 				type="extract:LocalNameType" minOccurs="0" maxOccurs="unbounded">
 			</xsd:element>
 			<xsd:element name="LandCoverShare"

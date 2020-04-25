@@ -281,7 +281,7 @@ public class MainController {
 
         if (withImages) {
             // TODO: database storage
-            Resource resource = resourceLoader.getResource("classpath:static/logo-grundstuecksinformation.png");
+            Resource resource = resourceLoader.getResource("classpath:static/logo-grundstuecksinformation_no_alpha.png");
             try {
                 InputStream input = resource.getInputStream();
                 File file = resource.getFile();      
@@ -294,7 +294,7 @@ public class MainController {
             extract.setCantonalLogo(getImage("ch."+parcel.getNbident().substring(0, 2).toLowerCase()));
             extract.setMunicipalityLogo(getImage("ch."+String.valueOf(parcel.getBfsnr())));
         } else {
-            extract.setLogoGrundstuecksinformationRef(ServletUriComponentsBuilder.fromCurrentContextPath().pathSegment("logo-grundstuecksinformation.png").build().toUriString()); // TODO: dpi (and database stored)
+            extract.setLogoGrundstuecksinformationRef(ServletUriComponentsBuilder.fromCurrentContextPath().pathSegment("logo-grundstuecksinformation_no_alpha.png").build().toUriString()); // TODO: dpi (and database stored)
             extract.setCantonalLogoRef(getLogoRef("ch."+parcel.getNbident().substring(0, 2).toLowerCase()));
             extract.setMunicipalityLogoRef(getLogoRef("ch."+String.valueOf(parcel.getBfsnr())));
         }
@@ -567,7 +567,7 @@ public class MainController {
                 
                 LandCoverShareType bb = new LandCoverShareType(); 
                 bb.setType(LCType.fromValue(art));
-                bb.setTypeDescription(LCType.fromValue(art).value());
+                bb.setTypeDescription(LCType.fromValue(art).value().substring(LCType.fromValue(art).value().lastIndexOf(".") + 1).trim());
                 bb.setArea(flaechenmass);
                 
                 return bb;
