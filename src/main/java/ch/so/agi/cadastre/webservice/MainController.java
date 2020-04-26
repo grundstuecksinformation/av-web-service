@@ -402,7 +402,6 @@ public class MainController {
                 Files.copy(is, fontFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
  
-//            File foFile = new File(Paths.get(tmpFolder.getAbsolutePath(), parcel.getEgrid() + ".fo").toFile().getAbsolutePath());
             File pdfFile = new File(Paths.get(tmpFolder.getAbsolutePath(), parcel.getEgrid() + ".pdf").toFile().getAbsolutePath());
             
             Processor proc = new Processor(false);
