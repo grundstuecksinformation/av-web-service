@@ -855,9 +855,6 @@ public class MainController {
     }
     
     private byte[] getImageOrNull(String code) {
-        
-        logger.info("SELECT logo FROM " + getSchema() + "." + TABLE_OERB_XTNX_V1_0ANNEX_LOGO + " WHERE acode=" + code);
-        
         java.util.List<byte[]> baseData = jdbcTemplate.queryForList(
                 "SELECT logo FROM " + getSchema() + "." + TABLE_OERB_XTNX_V1_0ANNEX_LOGO + " WHERE acode=?",
                 byte[].class, code);
