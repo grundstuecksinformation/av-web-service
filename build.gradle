@@ -19,7 +19,9 @@ configurations {
 }
 
 repositories {
-    maven { url "http://download.osgeo.org/webdav/geotools/" }
+    maven { url "https://download.osgeo.org/webdav/geotools/" }
+    maven { url "http://maven.geo-solutions.it" }
+    jcenter()    
     mavenCentral()
 }
 
