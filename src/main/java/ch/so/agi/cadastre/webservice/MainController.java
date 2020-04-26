@@ -2,6 +2,7 @@ package ch.so.agi.cadastre.webservice;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -17,6 +18,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -309,15 +311,12 @@ public class MainController {
 
         if (withImages) {
             // TODO: store in database
-            Resource resource = resourceLoader.getResource("classpath:static/logo-grundstuecksinformation_no_alpha.png");
             try {
-                InputStream input = resource.getInputStream();
-                File file = resource.getFile();      
-                byte[] targetArray = new byte[input.available()];
-                input.read(targetArray);
-                extract.setLogoGrundstuecksinformation(targetArray);
+                InputStream inputStream = new ClassPathResource("static/logo-grundstuecksinformation_no_alpha.png").getInputStream();                
+                byte[] bdata = FileCopyUtils.copyToByteArray(inputStream);
+                extract.setLogoGrundstuecksinformation(bdata);
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new IllegalStateException(e);
             }
             extract.setCantonalLogo(getImage("ch."+parcel.getNbident().substring(0, 2).toLowerCase()));
             extract.setMunicipalityLogo(getImage("ch."+String.valueOf(parcel.getBfsnr())));
