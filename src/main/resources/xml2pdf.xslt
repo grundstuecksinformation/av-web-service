@@ -388,6 +388,105 @@
           </fo:table-body>
         </fo:table>
       </fo:block-container>
+
+      <fo:block-container wrap-option="wrap" hyphenate="false" hyphenation-character="-" font-weight="400" font-size="8.5pt">
+        <fo:table table-layout="fixed" width="100%" margin-top="8mm">
+          <fo:table-column column-width="94mm"/>
+          <fo:table-column column-width="94mm"/>
+          <fo:table-body>
+            <fo:table-row>
+              <fo:table-cell font-weight="700" padding-top="2mm">
+                <fo:block>Grundbuchamt:</fo:block>
+              </fo:table-cell>
+              <fo:table-cell font-weight="700" padding-top="2mm">
+                <fo:block>Nachführungsgeometer:</fo:block>
+              </fo:table-cell>
+            </fo:table-row>
+            <fo:table-row>
+            <!--preserve anders lösen? Mit blocks?-->
+              <fo:table-cell font-weight="400" padding-top="2mm">
+                <fo:block linefeed-treatment="preserve">
+                  <xsl:value-of select="extract:LandRegisterOffice/extract:Name"/>
+                  <xsl:text>
+                  </xsl:text>
+                  <xsl:if test="extract:LandRegisterOffice/extract:Line1"><xsl:value-of select="extract:LandRegisterOffice/extract:Line1"/>
+                  <xsl:text> 
+                  </xsl:text>
+                </xsl:if>                  
+                  <xsl:value-of select="extract:LandRegisterOffice/extract:Address/extract:Street"/>
+                  <xsl:text> </xsl:text>
+                  <xsl:value-of select="extract:LandRegisterOffice/extract:Address/extract:Number"/>
+                  <xsl:text> 
+                  </xsl:text>
+                  <xsl:value-of select="extract:LandRegisterOffice/extract:Address/extract:PostalCode"/>
+                  <xsl:text> </xsl:text>
+                  <xsl:value-of select="extract:LandRegisterOffice/extract:Address/extract:City"/>
+                  <xsl:text> 
+                  </xsl:text>
+                  <xsl:text> 
+                  </xsl:text>
+                  <xsl:text>Telefon </xsl:text>
+                  <xsl:value-of select="extract:LandRegisterOffice/extract:Phone"/>
+                  <xsl:text> 
+                  </xsl:text>
+                  <fo:basic-link text-decoration="none" color="rgb(76,143,186)">
+                    <xsl:attribute name="external-destination">mailto:<xsl:value-of select="extract:LandRegisterOffice/extract:Email"/></xsl:attribute>
+                    <xsl:value-of select="extract:LandRegisterOffice/extract:Email"/>
+                  </fo:basic-link>
+                  <xsl:text> 
+                  </xsl:text>
+                  <fo:basic-link text-decoration="none" color="rgb(76,143,186)">
+                    <xsl:attribute name="external-destination"><xsl:value-of select="extract:LandRegisterOffice/extract:Web"/></xsl:attribute>so.ch
+                  </fo:basic-link>
+                </fo:block>
+              </fo:table-cell>
+              <fo:table-cell font-weight="400" padding-top="2mm">
+                <fo:block linefeed-treatment="preserve">
+                  <xsl:value-of select="extract:SurveyorOffice/extract:Person/extract:FirstName"/><xsl:text> </xsl:text><xsl:value-of select="extract:SurveyorOffice/extract:Person/extract:LastName"/>
+                  <xsl:text> 
+                  </xsl:text>
+                  <xsl:value-of select="extract:SurveyorOffice/extract:Name"/>
+                  <xsl:value-of select="extract:SurveyorOffice/extract:PostalAddress/extract:Line1"/>
+                  <xsl:if test="extract:SurveyorOffice/extract:Line1">
+                    <xsl:text> 
+                    </xsl:text>
+                    <xsl:value-of select="extract:SurveyorOffice/extract:Line1"/>
+                  </xsl:if>
+                  <xsl:text> 
+                  </xsl:text>
+                  <xsl:value-of select="extract:SurveyorOffice/extract:Address/extract:Street"/>
+                  <xsl:text> </xsl:text>
+                  <xsl:value-of select="extract:SurveyorOffice/extract:Address/extract:Number"/>
+                  <xsl:text> 
+                  </xsl:text>
+                  <xsl:value-of select="extract:SurveyorOffice/extract:Address/extract:PostalCode"/>
+                  <xsl:text> </xsl:text>
+                  <xsl:value-of select="extract:SurveyorOffice/extract:Address/extract:City"/>
+                  <xsl:text> 
+                  </xsl:text>
+                  <xsl:text> 
+                  </xsl:text>
+                  <xsl:text>Telefon </xsl:text>
+                  <xsl:value-of select="extract:SurveyorOffice/extract:Phone"/>
+                  <xsl:text> 
+                  </xsl:text>
+                  <fo:basic-link text-decoration="none" color="rgb(76,143,186)">
+                    <xsl:attribute name="external-destination">mailto:<xsl:value-of select="extract:SurveyorOffice/extract:Email"/></xsl:attribute>
+                    <xsl:value-of select="extract:SurveyorOffice/extract:Email"/>
+                  </fo:basic-link>
+                  <xsl:text> 
+                  </xsl:text>
+                  <fo:basic-link text-decoration="none" color="rgb(76,143,186)">
+                    <xsl:attribute name="external-destination">https://<xsl:value-of select="extract:SurveyorOffice/extract:Web"/></xsl:attribute>
+                    <xsl:value-of select="extract:SurveyorOffice/extract:Web"/>
+                  </fo:basic-link>
+                </fo:block>
+              </fo:table-cell>
+            </fo:table-row>
+          </fo:table-body>
+        </fo:table>
+      </fo:block-container>
+
     </fo:flow>
   </xsl:template>
 </xsl:stylesheet>
