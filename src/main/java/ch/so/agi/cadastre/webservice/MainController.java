@@ -2,8 +2,11 @@ package ch.so.agi.cadastre.webservice;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.xml.sax.SAXException;
 
 import ch.so.geo.schema.agi.cadastre._0_9.extract.AddressType;
 import ch.so.geo.schema.agi.cadastre._0_9.extract.BuildingEntryType;
@@ -40,9 +44,23 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import net.sf.saxon.s9api.XsltCompiler;
+import net.sf.saxon.s9api.XsltExecutable;
+import net.sf.saxon.s9api.XsltTransformer;
+import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.s9api.SAXDestination;
+import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.s9api.XdmNode;
+
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -59,7 +77,11 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
+import javax.xml.transform.stream.StreamSource;
 
+import org.apache.fop.apps.Fop;
+import org.apache.fop.apps.FopFactory;
+import org.apache.fop.apps.MimeConstants;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -123,6 +145,9 @@ public class MainController {
     
     @Value("${cadastre.minIntersection:1}")
     private double minIntersection;
+    
+    @Value("${cadastre.tmpdir:${java.io.tmpdir}}")
+    private String cadastreTmpdir;
 
     @GetMapping("/")
     public ResponseEntity<String>  ping() {
@@ -260,7 +285,10 @@ public class MainController {
 		}
 
         boolean withImages = withImagesParam==null?false:true;
-		
+        if(format.equals(PARAM_FORMAT_PDF)) {
+            withImages = true;
+        }
+
 		Grundstueck parcel = getParcelByEgrid(egrid);
 		if (parcel == null) {
 			return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
@@ -280,7 +308,7 @@ public class MainController {
         extract.setCreationDate(today);
 
         if (withImages) {
-            // TODO: database storage
+            // TODO: store in database
             Resource resource = resourceLoader.getResource("classpath:static/logo-grundstuecksinformation_no_alpha.png");
             try {
                 InputStream input = resource.getInputStream();
@@ -338,7 +366,73 @@ public class MainController {
 		GetExtractByIdResponse response = new GetExtractByIdResponse();
 		response.setExtract(extract);
 		
+        if(format.equals(PARAM_FORMAT_PDF)) {
+            return getExtractAsPdf(parcel, response);
+        }
         return new ResponseEntity<GetExtractByIdResponse>(response, HttpStatus.OK);
+	}
+	
+	private ResponseEntity<?> getExtractAsPdf(Grundstueck parcel, GetExtractByIdResponse response) {
+        File tmpFolder = new File(cadastreTmpdir,"cadastrews"+Thread.currentThread().getId());
+        if(!tmpFolder.exists()) {
+            tmpFolder.mkdirs();
+        }
+        logger.info("tmpFolder {}",tmpFolder.getAbsolutePath());
+
+        File tmpExtractFile = new java.io.File(tmpFolder,parcel.getEgrid()+".xml");
+        marshaller.marshal(response, new javax.xml.transform.stream.StreamResult(tmpExtractFile));
+
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        try {
+            Resource xsltFileResource = resolver.getResource("classpath:xml2pdf.xslt");
+            InputStream xsltFileInputStream;
+            xsltFileInputStream = xsltFileResource.getInputStream();
+            File xsltFile = new File(Paths.get(tmpFolder.getAbsolutePath(), "xml2pdf.xslt").toFile().getAbsolutePath());
+            Files.copy(xsltFileInputStream, xsltFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            
+            Resource fopXconfFileResource = resolver.getResource("classpath:fop.xconf");
+            InputStream fopXconfInputStream = fopXconfFileResource.getInputStream();
+            File fopXconfFile = new File(Paths.get(tmpFolder.getAbsolutePath(), "fop.xconf").toFile().getAbsolutePath());
+            Files.copy(fopXconfInputStream, fopXconfFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            
+            Resource[] fontResources = resolver.getResources("classpath:*.ttf");
+            for (Resource resource : fontResources) {
+                InputStream is = resource.getInputStream();
+                File fontFile = new File(Paths.get(tmpFolder.getAbsolutePath(), resource.getFilename()).toFile().getAbsolutePath());
+                Files.copy(is, fontFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+ 
+//            File foFile = new File(Paths.get(tmpFolder.getAbsolutePath(), parcel.getEgrid() + ".fo").toFile().getAbsolutePath());
+            File pdfFile = new File(Paths.get(tmpFolder.getAbsolutePath(), parcel.getEgrid() + ".pdf").toFile().getAbsolutePath());
+            
+            Processor proc = new Processor(false);
+            XsltCompiler comp = proc.newXsltCompiler();
+            XsltExecutable exp = comp.compile(new StreamSource(xsltFile));
+            XdmNode source = proc.newDocumentBuilder().build(new StreamSource(tmpExtractFile));
+            XsltTransformer trans = exp.load();
+            trans.setInitialContextNode(source);
+        
+            FopFactory fopFactory = FopFactory.newInstance(fopXconfFile);
+            OutputStream outPdf = new BufferedOutputStream(new FileOutputStream(pdfFile)); 
+            Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, outPdf);
+
+            trans.setDestination(new SAXDestination(fop.getDefaultHandler()));
+            trans.transform();
+            outPdf.close();
+            trans.close();
+
+            InputStream is = new java.io.FileInputStream(pdfFile);
+            return ResponseEntity
+                    .ok().header("content-disposition", "attachment; filename=" + pdfFile.getName())
+                    .contentLength(pdfFile.length())
+                    .contentType(MediaType.APPLICATION_PDF).body(new InputStreamResource(is));                
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        } catch (SaxonApiException e) {
+            throw new IllegalStateException(e);
+        } catch (SAXException e) {
+            throw new IllegalStateException(e);
+        }
 	}
 	
 	private void setVermessungsaufsichtAddress(RealEstateDPR realEstate) {       
