@@ -78,7 +78,14 @@ dependencies {
     */
     //compile "javax.media:jai-core:1.1.3" 
     //compile "com.sun.media:jai-codec:1.1.3"
-    implementation 'org.apache.xmlgraphics:fop:2.4'  
+    //implementation 'org.apache.xmlgraphics:fop:2.4'  
+    
+    // Sonst gibt es die Servlet API zweimal im Classpath
+    // und falls die falsche gewählt wird, funktioniert
+    // Spring Boot nicht, da zu alt.
+    compile('org.apache.xmlgraphics:fop:2.4') {
+        exclude group: 'javax.servlet', module: 'servlet-api'
+    }
     
     /*
     compile('org.apache.xmlgraphics:fop:2.4') {
