@@ -148,9 +148,6 @@ public class MainController {
     @Value("${cadastre.minIntersection:1}")
     private double minIntersection;
     
-    @Value("${cadastre.tmpdir:${java.io.tmpdir}}")
-    private String cadastreTmpdir;
-
     @GetMapping("/")
     public ResponseEntity<String>  ping() {
         return new ResponseEntity<String>("cadastre web service",HttpStatus.OK);
@@ -372,17 +369,18 @@ public class MainController {
 	}
 	
 	private ResponseEntity<?> getExtractAsPdf(Grundstueck parcel, GetExtractByIdResponse response) {
-        File tmpFolder = new File(cadastreTmpdir,"cadastrews"+Thread.currentThread().getId());
-        if(!tmpFolder.exists()) {
-            tmpFolder.mkdirs();
-        }
-        logger.info("tmpFolder {}",tmpFolder.getAbsolutePath());
+        try {		
+			File tmpFolder = Files.createTempDirectory("cadastrews-").toFile();
+			if (!tmpFolder.exists()) {
+				tmpFolder.mkdirs();
+			}
+			logger.info("tmpFolder {}", tmpFolder.getAbsolutePath());
 
-        File tmpExtractFile = new java.io.File(tmpFolder,parcel.getEgrid()+".xml");
-        marshaller.marshal(response, new javax.xml.transform.stream.StreamResult(tmpExtractFile));
+			File tmpExtractFile = new java.io.File(tmpFolder, parcel.getEgrid() + ".xml");
+			marshaller.marshal(response, new javax.xml.transform.stream.StreamResult(tmpExtractFile));
 
-        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        try {
+			ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+
             Resource xsltFileResource = resolver.getResource("classpath:xml2pdf.xslt");
             InputStream xsltFileInputStream;
             xsltFileInputStream = xsltFileResource.getInputStream();
