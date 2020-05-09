@@ -88,6 +88,9 @@ dependencies {
     // Spring Boot nicht, da zu alt.
     compile('org.apache.xmlgraphics:fop:2.4') {
         exclude group: 'javax.servlet', module: 'servlet-api'
+        exclude group: 'xml-apis', module: 'xml-apis'
+        exclude group: 'javax.media', module: 'jai-core'
+        exclude group: 'com.sun.media', module: 'jai-codec'
     }
     
     /*

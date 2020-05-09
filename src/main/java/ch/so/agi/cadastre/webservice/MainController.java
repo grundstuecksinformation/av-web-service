@@ -72,6 +72,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TimeZone;
 
 import javax.xml.bind.JAXBElement;
@@ -866,4 +867,13 @@ public class MainController {
         }
         return null;
     }
+    
+    public static Throwable findCauseUsingPlainJava(Throwable throwable) {
+            Objects.requireNonNull(throwable);
+            Throwable rootCause = throwable;
+            while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
+                rootCause = rootCause.getCause();
+            }
+            return rootCause;
+        }
 }
