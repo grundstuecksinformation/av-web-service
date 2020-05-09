@@ -351,7 +351,12 @@ public class MainController {
         realEstate.setType(gsArtLookUp(parcel.getArt()).value());
         
         setFlurnamen(realEstate, parcel.getGeometrie());
-        setBodenbedeckung(realEstate, parcel.getGeometrie());
+        try {
+            setBodenbedeckung(realEstate, parcel.getGeometrie());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error(e.getMessage());
+        }
         setGebaeude(realEstate, parcel.getGeometrie());
         setNfGeometerAddress(realEstate, parcel.getBfsnr());
         setGrundbuchamtAddress(realEstate, parcel.getGbSubKreisNummer());
