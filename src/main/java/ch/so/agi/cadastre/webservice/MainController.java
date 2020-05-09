@@ -357,6 +357,10 @@ public class MainController {
         } catch (Exception e) {
             e.printStackTrace();
             logger.error(e.getMessage());
+            logger.info("-----");
+            Throwable rootCause = findCauseUsingPlainJava(e.getCause());
+            rootCause.printStackTrace();
+            logger.error(rootCause.getMessage());
         }
         setGebaeude(realEstate, parcel.getGeometrie());
         setNfGeometerAddress(realEstate, parcel.getBfsnr());
