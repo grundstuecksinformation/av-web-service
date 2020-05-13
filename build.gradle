@@ -69,10 +69,17 @@ dependencies {
     }
     //implementation 'org.apache.tomcat:tomcat-jdbc:9.0.10'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'javax.xml.bind:jaxb-api:2.3.1'
-    implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.1'    
+    //implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    //implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.1'    
     implementation 'org.springframework:spring-oxm:5.1.6.RELEASE'
     implementation 'net.sf.saxon:Saxon-HE:9.9.1-7' 
+    
+    
+    compile group: 'javax.xml.bind',name:'jaxb-api', version:'2.3.1'
+    compile group: 'com.sun.xml.bind',name:'jaxb-core', version:'2.3.0.1'
+    compile group: 'com.sun.xml.bind',name:'jaxb-impl', version:'2.3.2'
+    compile group: 'javax.activation', name: 'activation', version: '1.1.1'
+    
     
     /* Probleme mit jai-core und jai-codec. See: https://issues.apache.org/jira/browse/FOP-2889
     * Wurde im Trunk wieder auf optional (compile?) verändert, damit runtime ohne libs
