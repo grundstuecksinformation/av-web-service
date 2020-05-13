@@ -664,29 +664,33 @@ public class MainController {
             public LandCoverShareType mapRow(ResultSet rs, int rowNum) throws SQLException {
                 double flaechenmass = rs.getDouble("flaechenmass");
                 String art = rs.getString("art");
+                String mappedArt;
                 
                 // TODO
                 // temporär bis in der DB die korrekten Aufzähltypwerte stehen
                 if (art.contains("Sportanlage_befestigt") || art.contains("Lagerplatz") || art.contains("Boeschungsbauwerk")
                         || art.contains("Gebaeudeerschliessung") || art.contains("Parkplatz") || art.contains("uebrige_befestigte.uebrige_befestigte")) {
-                    art = "befestigt.uebrige_befestigte";
+                    mappedArt = "befestigt.uebrige_befestigte";
                 } else if (art.contains("Acker_Wiese_Weide.Acker_Wiese") || art.contains("Acker_Wiese_Weide.Weide")) {
-                    art = "humusiert.Acker_Wiese_Weide";
+                    mappedArt = "humusiert.Acker_Wiese_Weide";
                 } else if (art.contains("Obstkultur") || art.contains("uebrige_Intensivkultur.uebrige_Intensivkultur")) {
-                    art = "humusiert.Intensivkultur.uebrige_Intensivkultur";
+                    mappedArt = "humusiert.Intensivkultur.uebrige_Intensivkultur";
                 } else if (art.contains("Gartenanlage.Gartenanlage") || art.contains("Parkanlage_humusiert") || art.contains("Sportanlage_humusiert")
                         || art.contains("Friedhof")) {
-                    art = "humusiert.Gartenanlage";
+                    mappedArt = "humusiert.Gartenanlage";
                 } else if (art.contains("Parkanlage_bestockt") || art.contains("Hecke") || art.contains("uebrige_bestockte.uebrige_bestockte")) {
-                    art = "bestockt.uebrige_bestockte";
+                    mappedArt = "bestockt.uebrige_bestockte";
                 } else if (art.contains("Steinbruch") || art.contains("Kiesgrube") || art.contains("Abbau_Deponie.Deponie") || art.contains("uebriger_Abbau") ||
                         art.contains("uebrige_vegetationslose")) {
-                    art = "vegetationslos.Abbau_Deponie";
-                }
+                    mappedArt = "vegetationslos.Abbau_Deponie";
+                } else {
+                    mappedArt = art;
+                } 
                 
                 LandCoverShareType bb = new LandCoverShareType(); 
-                bb.setType(LCType.fromValue(art));
-                bb.setTypeDescription(LCType.fromValue(art).value().substring(LCType.fromValue(art).value().lastIndexOf(".") + 1).trim());
+                bb.setType(LCType.fromValue(mappedArt));
+                //bb.setTypeDescription(LCType.fromValue(art).value().substring(LCType.fromValue(art).value().lastIndexOf(".") + 1).trim());
+                bb.setTypeDescription(art.substring(art.lastIndexOf(".") + 1).trim());
                 bb.setArea(flaechenmass);
                 
                 return bb;
