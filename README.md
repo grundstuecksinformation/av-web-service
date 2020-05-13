@@ -42,5 +42,6 @@ docker run -p8080:8080 -e DBURL=jdbc:postgresql://host.docker.internal:54321/gru
 
 ```
 https://geo-t.so.ch/api/cadastre/getegrid/xml/?XY=2600564,1215478
-
+https://geo-t.so.ch/api/cadastre/extract/xml/geometry/CH955832730623
+https://geo-t.so.ch/api/cadastre/extract/pdf/geometry/CH955832730623
 ```
