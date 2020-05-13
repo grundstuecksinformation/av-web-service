@@ -665,6 +665,25 @@ public class MainController {
                 double flaechenmass = rs.getDouble("flaechenmass");
                 String art = rs.getString("art");
                 
+                // TODO
+                // temporär bis in der DB die korrekten Aufzähltypwerte stehen
+                if (art.contains("Sportanlage_befestigt") || art.contains("Lagerplatz") || art.contains("Boeschungsbauwerk")
+                        || art.contains("Gebaeudeerschliessung") || art.contains("Parkplatz") || art.contains("uebrige_befestigte.uebrige_befestigte")) {
+                    art = "befestigt.uebrige_befestigte";
+                } else if (art.contains("Acker_Wiese_Weide.Acker_Wiese") || art.contains("Acker_Wiese_Weide.Weide")) {
+                    art = "humusiert.Acker_Wiese_Weide";
+                } else if (art.contains("Obstkultur") || art.contains("uebrige_Intensivkultur.uebrige_Intensivkultur")) {
+                    art = "humusiert.Intensivkultur.uebrige_Intensivkultur";
+                } else if (art.contains("Gartenanlage.Gartenanlage") || art.contains("Parkanlage_humusiert") || art.contains("Sportanlage_humusiert")
+                        || art.contains("Friedhof")) {
+                    art = "humusiert.Gartenanlage";
+                } else if (art.contains("Parkanlage_bestockt") || art.contains("Hecke") || art.contains("uebrige_bestockte.uebrige_bestockte")) {
+                    art = "bestockt.uebrige_bestockte";
+                } else if (art.contains("Steinbruch") || art.contains("Kiesgrube") || art.contains("Abbau_Deponie.Deponie") || art.contains("uebriger_Abbau") ||
+                        art.contains("uebrige_vegetationslose")) {
+                    art = "vegetationslos.Abbau_Deponie";
+                }
+                
                 LandCoverShareType bb = new LandCoverShareType(); 
                 bb.setType(LCType.fromValue(art));
                 bb.setTypeDescription(LCType.fromValue(art).value().substring(LCType.fromValue(art).value().lastIndexOf(".") + 1).trim());
