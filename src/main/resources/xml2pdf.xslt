@@ -6,12 +6,12 @@
     <fo:root xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:xsd="https://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" font-family="Cadastra" language="de">
       <fo:layout-master-set>
         <fo:simple-page-master master-name="firstPage" page-height="297mm" page-width="210mm" margin-top="10mm" margin-bottom="10mm" margin-left="12mm" margin-right="10mm">
-          <fo:region-body margin-top="35mm" background-color="#FFFFFF"/>
+          <fo:region-body margin-top="35mm" margin-bottom="15mm" background-color="#FFFFFF"/>
           <fo:region-before extent="30mm" background-color="#FFFFFF"/>
           <fo:region-after extent="10mm" background-color="#FFFFFF" display-align="after"/>
         </fo:simple-page-master>
         <fo:simple-page-master master-name="middlePage" page-height="297mm" page-width="210mm" margin-top="10mm" margin-bottom="10mm" margin-left="12mm" margin-right="10mm">
-          <fo:region-body margin-top="15mm" background-color="#FFFFFF"/>
+          <fo:region-body margin-top="15mm" margin-bottom="15mm" background-color="#FFFFFF"/>
           <fo:region-before extent="10mm" background-color="#FFFFFF"/>
           <fo:region-after extent="10mm" background-color="#FFFFFF" display-align="after"/>
         </fo:simple-page-master>
