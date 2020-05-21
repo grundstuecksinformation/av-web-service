@@ -180,13 +180,13 @@
 
 	<xsd:complexType name="GetEGRIDResponseType">
 		<xsd:sequence minOccurs="0" maxOccurs="unbounded">
-			<xsd:element name="Egrid" type="xsd:token"></xsd:element>
+			<xsd:element name="EGRID" type="xsd:token"></xsd:element>
 			<xsd:element name="Number" type="xsd:token"></xsd:element>
 			<xsd:element name="IdentND" type="xsd:token"></xsd:element>
 			<xsd:element name="Type" type="extract:RealEstateType"></xsd:element>
 			<xsd:element name="StateOf" type="xsd:date"></xsd:element>
-			<xsd:element name="Limit" type="xsd:normalizedString"></xsd:element>
-			<xsd:element name="planned" type="xsd:boolean" minOccurs="1" maxOccurs="1"></xsd:element>
+			<xsd:element name="Limit" type="xsd:token"></xsd:element>
+			<xsd:element name="planned" type="xsd:boolean"></xsd:element>
 		</xsd:sequence>
 	</xsd:complexType>
 
