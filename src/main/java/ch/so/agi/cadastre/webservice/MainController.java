@@ -194,12 +194,12 @@ public class MainController {
                 }, number, identdn);
 
         for (JAXBElement<?>[] gs : gsList) {
-            ret.getEgridsAndLimitsAndStateOves().add(gs[0]);
-            ret.getEgridsAndLimitsAndStateOves().add(gs[1]);
-            ret.getEgridsAndLimitsAndStateOves().add(gs[2]);
-            ret.getEgridsAndLimitsAndStateOves().add(gs[3]);            
-            ret.getEgridsAndLimitsAndStateOves().add(gs[4]);
-            ret.getEgridsAndLimitsAndStateOves().add(gs[5]);
+            ret.getEGRIDSAndPlannedsAndLimits().add(gs[0]);
+            ret.getEGRIDSAndPlannedsAndLimits().add(gs[1]);
+            ret.getEGRIDSAndPlannedsAndLimits().add(gs[2]);
+            ret.getEGRIDSAndPlannedsAndLimits().add(gs[3]);            
+            ret.getEGRIDSAndPlannedsAndLimits().add(gs[4]);
+            ret.getEGRIDSAndPlannedsAndLimits().add(gs[5]);
         }
         return new ResponseEntity<GetEGRIDResponse>(ret,gsList.size()>0?HttpStatus.OK:HttpStatus.NO_CONTENT);
     }
@@ -215,7 +215,8 @@ public class MainController {
     @GetMapping(value="/getegrid/{format}", produces=MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<GetEGRIDResponse> getEgridByXY(@PathVariable String format,
             @RequestParam(value = "XY", required = false) String xy,
-            @RequestParam(value = "GNSS", required = false) String gnss) {
+            @RequestParam(value = "GNSS", required = false) String gnss,
+            @RequestParam(value="WITHPLANNED", required=false) String withPlannedParam) {
         if (!format.equals(PARAM_FORMAT_XML)) {
             throw new IllegalArgumentException("unsupported format <" + format + ">");
         }
@@ -239,6 +240,8 @@ public class MainController {
             scale = 100000.0;
         }
 
+        boolean withPlanned = withPlannedParam==null?false:true;
+        
         WKBWriter geomEncoder = new WKBWriter(2, ByteOrderValues.BIG_ENDIAN, true);
         PrecisionModel precisionModel = new PrecisionModel(scale);
         GeometryFactory geomFact = new GeometryFactory(precisionModel, srid);
@@ -254,25 +257,27 @@ public class MainController {
                 , new RowMapper<JAXBElement<?>[]>() {
                     @Override
                     public JAXBElement<?>[] mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        JAXBElement<?> ret[]=new JAXBElement[6];
-                        ret[0]=new JAXBElement<String>(new QName(extractNS,"Egrid"),String.class,rs.getString(1));
+                        JAXBElement<?> ret[]=new JAXBElement[7];
+                        ret[0]=new JAXBElement<String>(new QName(extractNS,"EGRID"),String.class,rs.getString(1));
                         ret[1]=new JAXBElement<String>(new QName(extractNS,"Number"),String.class,rs.getString(2));
                         ret[2]=new JAXBElement<String>(new QName(extractNS,"IdentND"),String.class,rs.getString(3));
                         ret[3]=new JAXBElement<RealEstateType>(new QName(extractNS,"Type"),RealEstateType.class,gsArtLookUp(rs.getString(4)));
                         String sqlDate = (rs.getString(6) != null) ? rs.getString(6) : rs.getString(5);
                         ret[4]=new JAXBElement<XMLGregorianCalendar>(new QName(extractNS,"StateOf"),XMLGregorianCalendar.class,stringDateToXmlGregorianCalendar(sqlDate));
                         ret[5]=new JAXBElement<String>(new QName(extractNS,"Limit"),String.class,rs.getString(7));
+                        ret[6]=new JAXBElement<Boolean>(new QName(extractNS,"planned"),Boolean.class,new Boolean(false));
                         return ret;
                     }
                 }, geom);
 
         for (JAXBElement<?>[] gs : gsList) {
-            ret.getEgridsAndLimitsAndStateOves().add(gs[0]);
-            ret.getEgridsAndLimitsAndStateOves().add(gs[1]);
-            ret.getEgridsAndLimitsAndStateOves().add(gs[2]);
-            ret.getEgridsAndLimitsAndStateOves().add(gs[3]);            
-            ret.getEgridsAndLimitsAndStateOves().add(gs[4]);
-            ret.getEgridsAndLimitsAndStateOves().add(gs[5]);
+            ret.getEGRIDSAndPlannedsAndLimits().add(gs[0]);
+            ret.getEGRIDSAndPlannedsAndLimits().add(gs[1]);
+            ret.getEGRIDSAndPlannedsAndLimits().add(gs[2]);
+            ret.getEGRIDSAndPlannedsAndLimits().add(gs[3]);            
+            ret.getEGRIDSAndPlannedsAndLimits().add(gs[4]);
+            ret.getEGRIDSAndPlannedsAndLimits().add(gs[5]);
+            ret.getEGRIDSAndPlannedsAndLimits().add(gs[6]);
         }
         return new ResponseEntity<GetEGRIDResponse>(ret,gsList.size()>0?HttpStatus.OK:HttpStatus.NO_CONTENT);
     }
@@ -352,20 +357,14 @@ public class MainController {
         realEstate.setType(gsArtLookUp(parcel.getArt()).value());
         
         setFlurnamen(realEstate, parcel.getGeometrie());
-        try {
-            setBodenbedeckung(realEstate, parcel.getGeometrie());
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.error(e.getMessage());
-            logger.info("-----");
-            Throwable rootCause = findCauseUsingPlainJava(e.getCause());
-            rootCause.printStackTrace();
-            logger.error(rootCause.getMessage());
-        }
+        setBodenbedeckung(realEstate, parcel.getGeometrie());
         setGebaeude(realEstate, parcel.getGeometrie());
         setNfGeometerAddress(realEstate, parcel.getBfsnr());
         setGrundbuchamtAddress(realEstate, parcel.getGbSubKreisNummer());
         setVermessungsaufsichtAddress(realEstate);
+        
+        // TODO
+//        realEstate.getPendingTransactions().add(e);
         
         extract.setRealEstate(realEstate);
         
@@ -894,13 +893,4 @@ public class MainController {
         }
         return null;
     }
-    
-    public static Throwable findCauseUsingPlainJava(Throwable throwable) {
-            Objects.requireNonNull(throwable);
-            Throwable rootCause = throwable;
-            while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
-                rootCause = rootCause.getCause();
-            }
-            return rootCause;
-        }
 }
