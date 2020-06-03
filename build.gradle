@@ -152,6 +152,11 @@ docker {
     }
 }
 
+task pullDockerImage(type: DockerPullImage) {
+    description = "Pull docker image."
+    image = "sogis/cadastre-web-service:latest"
+}
+
 task buildDockerImage(type: DockerBuildImage) {
     description = "Build docker image."
     inputDir = project.rootDir
