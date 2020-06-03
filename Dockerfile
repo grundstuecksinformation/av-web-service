@@ -15,6 +15,6 @@ RUN chown -R 1001:0 /home/cadastrewebservice && \
 
 USER 1001
 
-ENTRYPOINT ["java","-XX:MaxRAMPercentage=80.0","-cp","app:app/lib/*","ch.so.agi.cadastre.webservice.CadastreWebServiceApplication","--spring.datasource.url=${DBURL}","--spring.datasource.username=${DBUSR}","--spring.datasource.password=${DBPWD}","--cadastre.dbschema=${DBSCHEMA}","--spring.datasource.driver-class-name=org.postgresql.Driver"]
+ENTRYPOINT ["java","-XX:MaxRAMPercentage=80.0", "-noverify", "-XX:TieredStopAtLevel=1", "-cp","app:app/lib/*","ch.so.agi.cadastre.webservice.CadastreWebServiceApplication","--spring.datasource.url=${DBURL}","--spring.datasource.username=${DBUSR}","--spring.datasource.password=${DBPWD}","--cadastre.dbschema=${DBSCHEMA}","--spring.datasource.driver-class-name=org.postgresql.Driver"]
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s CMD curl http://localhost:8080/actuator/health
