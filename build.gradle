@@ -161,6 +161,7 @@ task pullDockerImage(type: DockerPullImage) {
 task buildDockerImage(type: DockerBuildImage) {
     description = "Build docker image."
     inputDir = project.rootDir
+    cacheFrom.add("sogis/cadastre-web-service:latest")
     images.add("sogis/cadastre-web-service:"+version.toString())
     images.add("sogis/cadastre-web-service:latest")
     labels = ["cadastre-web-service.created": new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()), 
