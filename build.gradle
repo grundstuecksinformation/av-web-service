@@ -95,7 +95,7 @@ dependencies {
     // Sonst gibt es die Servlet API zweimal im Classpath
     // und falls die falsche gewählt wird, funktioniert
     // Spring Boot nicht, da zu alt.
-    implementation('org.apache.xmlgraphics:fop:2.4') {
+    implementation('org.apache.xmlgraphics:fop:2.6') {
         exclude group: 'javax.servlet', module: 'servlet-api'
         exclude group: 'xml-apis', module: 'xml-apis'
         exclude group: 'javax.media', module: 'jai-core'
