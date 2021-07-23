@@ -33,6 +33,7 @@ bindings.xjb:
 
 ### Database
 
+FIXME:
 ```
 docker run --rm --name grundstuecksinformation-db -p 54321:5432 --hostname primary -e PG_DATABASE=grundstuecksinformation -e PG_LOCALE=de_CH.UTF-8 -e PG_PRIMARY_PORT=5432 -e PG_MODE=primary -e PG_USER=admin -e PG_PASSWORD=admin -e PG_PRIMARY_USER=repl -e PG_PRIMARY_PASSWORD=repl -e PG_ROOT_PASSWORD=secret -e PG_WRITE_USER=gretl -e PG_WRITE_PASSWORD=gretl -e PG_READ_USER=ogc_server -e PG_READ_PASSWORD=ogc_server -v ~/pgdata-grundstuecksinformation:/pgdata:delegated sogis/oereb-db:latest
 ```
@@ -57,20 +58,17 @@ java -jar /Users/stefan/apps/SaxonHE9-9-1-7J/saxon9he.jar -s:src/test/data/CH310
 ## Building
 
 ### Docker
+Local:
+```
+(docker buildx create --use)
+docker buildx build --platform linux/amd64,linux/arm64  --push -t edigonzales/cadastre-web-service -f Dockerfile.alpine .
+```
 
-```
-docker build -t sogis/cadastre-web-service .
-```
+Github Action: see workflow file.
 
 ## Running
 ```
-docker run -p8080:8080 -e DBURL=jdbc:postgresql://localhost:54321/grundstuecksinformation -e DBUSR=gretl -e DBPWD=gretl -e DBSCHEMA=live sogis/cadastre-web-service
+docker run -p8080:8080 -e DBURL=jdbc:postgresql://localhost:54323/oereb -e DBUSR=gretl -e DBPWD=gretl -e DBSCHEMA=live sogis/cadastre-web-service
 
-docker run -p8080:8080 -e DBURL=jdbc:postgresql://host.docker.internal:54321/grundstuecksinformation -e DBUSR=gretl -e DBPWD=gretl -e DBSCHEMA=live sogis/cadastre-web-service
-```
-
-```
-https://geo-t.so.ch/api/cadastre/getegrid/xml/?XY=2600564,1215478
-https://geo-t.so.ch/api/cadastre/extract/xml/geometry/CH955832730623
-https://geo-t.so.ch/api/cadastre/extract/pdf/geometry/CH955832730623
+docker run -p8080:8080 -e DBURL=jdbc:postgresql://host.docker.internal:54323/oereb -e DBUSR=gretl -e DBPWD=gretl -e DBSCHEMA=live sogis/cadastre-web-service
 ```
