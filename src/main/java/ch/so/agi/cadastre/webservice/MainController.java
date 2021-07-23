@@ -39,12 +39,6 @@ import ch.so.geo.schema.agi.cadastre._0_9.extract.OrganisationType;
 import ch.so.geo.schema.agi.cadastre._0_9.extract.PersonAddressType;
 import ch.so.geo.schema.agi.cadastre._0_9.extract.RealEstateDPR;
 import ch.so.geo.schema.agi.cadastre._0_9.extract.RealEstateType;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 
 import net.sf.saxon.s9api.XsltCompiler;
 import net.sf.saxon.s9api.XsltExecutable;
