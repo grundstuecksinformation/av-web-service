@@ -8,7 +8,9 @@ plugins {
 apply from: "gradle/versioning.gradle"
 
 group = 'ch.so.agi'
-sourceCompatibility = '8'
+
+sourceCompatibility = '11'
+targetCompatibility = '11'
 
 configurations {
     jaxb
@@ -19,10 +21,10 @@ configurations {
 }
 
 repositories {
-    maven { url "https://repository.jboss.org/nexus/content/repositories/thirdparty-releases" }
-    maven { url "https://download.osgeo.org/webdav/geotools/" }
-    maven { url "http://maven.geo-solutions.it" }
-    jcenter()    
+    //maven { url "https://repository.jboss.org/nexus/content/repositories/thirdparty-releases" }
+    //maven { url "https://download.osgeo.org/webdav/geotools/" }
+    //maven { url "http://maven.geo-solutions.it" }
+    //jcenter()    
     mavenCentral()
 }
 
@@ -75,10 +77,10 @@ dependencies {
     implementation 'net.sf.saxon:Saxon-HE:9.9.1-7' 
     
     
-    compile group: 'javax.xml.bind',name:'jaxb-api', version:'2.3.1'
-    compile group: 'com.sun.xml.bind',name:'jaxb-core', version:'2.3.0.1'
-    compile group: 'com.sun.xml.bind',name:'jaxb-impl', version:'2.3.2'
-    compile group: 'javax.activation', name: 'activation', version: '1.1.1'
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    implementation 'com.sun.xml.bind:jaxb-core:2.3.0.1'
+    implementation 'com.sun.xml.bind:jaxb-impl:2.3.2'
+    implementation 'javax.activation:activation1.1.1'
     
     
     /* Probleme mit jai-core und jai-codec. See: https://issues.apache.org/jira/browse/FOP-2889
@@ -93,7 +95,7 @@ dependencies {
     // Sonst gibt es die Servlet API zweimal im Classpath
     // und falls die falsche gewählt wird, funktioniert
     // Spring Boot nicht, da zu alt.
-    compile('org.apache.xmlgraphics:fop:2.4') {
+    implementation('org.apache.xmlgraphics:fop:2.4') {
         exclude group: 'javax.servlet', module: 'servlet-api'
         exclude group: 'xml-apis', module: 'xml-apis'
         exclude group: 'javax.media', module: 'jai-core'
@@ -107,11 +109,11 @@ dependencies {
     }*/
   
     implementation 'net.sf.offo:fop-hyph:2.0'   
-    compile group: 'org.locationtech.jts', name: 'jts-core', version: '1.16.1'
-    compile group: 'org.locationtech.jts', name: 'jts-io', version: '1.16.1', ext: 'pom'
-    compile group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.2.34'    
+    implementation 'org.locationtech.jts:jts-core:1.16.1'
+    implementation 'org.locationtech.jts:jts-io:1.16.1' // ??, ext: 'pom'
+    implementation 'org.springdoc:springdoc-openapi-ui:1.2.34'    
     jaxb("org.glassfish.jaxb:jaxb-xjc:2.3.2")
-    compile(files(genJaxb.classesDir).builtBy(genJaxb))
+    implementation(files(genJaxb.classesDir).builtBy(genJaxb))
     runtimeOnly 'org.postgresql:postgresql'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
