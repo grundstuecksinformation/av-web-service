@@ -2,6 +2,35 @@
 
 ## Developing
 
+## Jakarta vs javax
+`spring-omx` verwendet noch die alten javax-Pakete. Aus diesem Grund kann noch nicht auf Jakarta umgestellt werden (siehe auch: https://stackoverflow.com/questions/68254055/springboot-application-javax-to-jakarta-migration-question). Es erscheint immer die Fehlermeldung:
+
+```
+Caused by: java.lang.NoClassDefFoundError: javax/xml/bind/JAXBException
+	at ch.so.agi.cadastre.webservice.WsConfig.createMarshaller(WsConfig.java:17) ~[main/:na]
+```
+
+build.gradle für Jakarta:
+```
+dependencies {
+    ...
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:3.0.1'
+    implementation 'org.glassfish.jaxb:jaxb-runtime:3.0.1'
+    implementation(files(genJaxb.classesDir).builtBy(genJaxb))
+    ....
+    jaxb 'org.glassfish.jaxb:jaxb-xjc:3.0.1'
+    jaxb 'jakarta.xml.bind:jakarta.xml.bind-api:3.0.1'
+    jaxb 'org.glassfish.jaxb:jaxb-runtime:3.0.1'
+    jaxb 'jakarta.activation:jakarta.activation-api:2.0.0'
+    ...
+```
+
+bindings.xjb:
+```
+<jxb:bindings version="3.0" xmlns:jxb="https://jakarta.ee/xml/ns/jaxb" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc" jxb:extensionBindingPrefixes="xjc" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+```
+
+
 ### Database
 
 ```
