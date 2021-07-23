@@ -112,16 +112,6 @@ import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
 import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
-import com.bmuschko.gradle.docker.tasks.container.DockerLogsContainer
-import com.bmuschko.gradle.docker.tasks.container.DockerStopContainer
-import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer.ExposedPort
-
-import com.bmuschko.gradle.docker.tasks.image.Dockerfile
-import com.bmuschko.gradle.docker.tasks.image.DockerPullImage
-import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
-import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
-import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
-import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer.ExposedPort
 import com.bmuschko.gradle.docker.tasks.container.DockerStopContainer
 
@@ -140,6 +130,7 @@ task pullDockerImage(type: DockerPullImage) {
 
 task buildDockerImage(type: DockerBuildImage) {
     inputDir = project.rootDir
+    dockerFile = file("Dockerfile.alpine")
     images = ["edigonzales/cadastre-web-service:"+version.toString(), "edigonzales/cadastre-web-service:latest"]
     labels = ["cadastre-web-service.created": new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()), 
             "cadastre-web-service.git_commit":  getCheckedOutGitCommitHash(), 

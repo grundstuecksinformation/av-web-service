@@ -58,7 +58,7 @@ java -jar /Users/stefan/apps/SaxonHE9-9-1-7J/saxon9he.jar -s:src/test/data/CH310
 ## Building
 
 ### Docker
-Local:
+Apple Silicon:
 ```
 (docker buildx create --use)
 docker buildx build --platform linux/amd64,linux/arm64  --push -t edigonzales/cadastre-web-service -f Dockerfile.alpine .
