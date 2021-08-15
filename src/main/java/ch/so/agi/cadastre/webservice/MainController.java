@@ -61,13 +61,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.TimeZone;
+import java.util.TreeSet;
+import java.util.Comparator;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -80,6 +84,7 @@ import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.MimeConstants;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
@@ -89,8 +94,8 @@ import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.WKBWriter;
 import org.slf4j.Logger;
 
-//@RestController
-@Controller
+@RestController
+//@Controller
 public class MainController {
     private final Logger logger = org.slf4j.LoggerFactory.getLogger(this.getClass());
 
@@ -198,14 +203,6 @@ public class MainController {
         return new ResponseEntity<GetEGRIDResponse>(ret,gsList.size()>0?HttpStatus.OK:HttpStatus.NO_CONTENT);
     }
 
-    /*
-    @Operation(summary = "Find egrid by XY", description = "Liste der Grundstücke", tags = { "contact_egrid_egrid_wasn_da? (tags)" })
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "OK, Antwort konnte erstellt werden", content = @Content(schema = @Schema(implementation = GetEGRIDResponse.class))),
-        @ApiResponse(responseCode = "204", description = "Kein Grundstück gefunden"), 
-        @ApiResponse(responseCode = "500", description = "Andere Fehler") 
-    })
-    */
     @GetMapping(value="/getegrid/{format}", produces=MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<GetEGRIDResponse> getEgridByXY(@PathVariable String format,
             @RequestParam(value = "XY", required = false) String xy,
@@ -275,6 +272,83 @@ public class MainController {
         }
         return new ResponseEntity<GetEGRIDResponse>(ret,gsList.size()>0?HttpStatus.OK:HttpStatus.NO_CONTENT);
     }
+    
+    @GetMapping(value = "/extract/pdf/map/{egrid}", consumes = MediaType.ALL_VALUE, produces = {
+            MediaType.APPLICATION_PDF_VALUE })
+    public ResponseEntity<?> getMapByEgrid(@PathVariable String egrid) {
+        Grundstueck parcel = getParcelByEgrid(egrid);
+        if (parcel == null) {
+            return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+        }
+        
+        // TODO config
+        TreeSet<Integer> allowedScaleDenoms = new TreeSet<Integer>() {
+            {
+                add(100);
+                add(150);
+                add(200);
+                add(250);
+                add(500);
+                add(1000);
+                add(2000);
+                add(2500);
+                add(3000);
+                add(4000);
+                add(5000);
+                add(7500);
+                add(10000);
+                add(20000);
+                add(25000);
+                add(50000);
+                add(100000);
+                add(200000);
+                add(250000);
+                add(500000);
+                add(1000000);
+                add(2); // test last()
+            }
+        };
+        
+        // TODO config
+        // A4-hoch
+        double layoutWidth = 0.244;
+        double layoutHeight = 0.196;
+        
+        Geometry geometry = parcel.getGeometrie();
+        Envelope envelope = geometry.getEnvelopeInternal();
+        
+        double width = envelope.getMaxX() - envelope.getMinX();
+        double height = envelope.getMaxY() - envelope.getMinY();
+        double scaleW = layoutWidth / width;
+        double scaleH = layoutHeight / height;
+        boolean scaleFitW = scaleW < scaleH ? true : false;
+        //double scaleDen = 1.0 / Math.min(scaleW, scaleH);
+        double scaleDen = 10000000;
+        
+        Integer c = allowedScaleDenoms.higher((int)scaleDen);
+        System.out.println(c);
+        System.out.println(allowedScaleDenoms.last());
+        
+        logger.info(String.valueOf(scaleW));
+        logger.info(String.valueOf(scaleDen));
+        
+        // 0.244m
+        // 0.196m
+        
+        // 0.186m
+        // 0.287m
+        
+        
+        
+        
+//        logger.info(geometry.toString());
+//        logger.info(geometry.getEnvelopeInternal().get.toString());
+        
+        
+        return null;
+    }
+    
+    
     
 	@GetMapping(value = "/extract/{format}/geometry/{egrid}", consumes = MediaType.ALL_VALUE, produces = {
 			MediaType.APPLICATION_PDF_VALUE, MediaType.APPLICATION_XML_VALUE })
