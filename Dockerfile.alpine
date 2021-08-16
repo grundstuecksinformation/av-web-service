@@ -4,14 +4,14 @@ FROM bellsoft/liberica-openjdk-alpine:11.0.12-7
 
 EXPOSE 8080
 
-WORKDIR /home/cadastrewebservice
+WORKDIR /home/avwebservice
 
 ARG DEPENDENCY=build/dependency
-COPY ${DEPENDENCY}/BOOT-INF/lib /home/cadastrewebservice/app/lib
-COPY ${DEPENDENCY}/META-INF /home/cadastrewebservice/app/META-INF
-COPY ${DEPENDENCY}/BOOT-INF/classes /home/cadastrewebservice/app
-RUN chown -R 1001:0 /home/cadastrewebservice && \
-    chmod -R g=u /home/cadastrewebservice
+COPY ${DEPENDENCY}/BOOT-INF/lib /home/avwebservice/app/lib
+COPY ${DEPENDENCY}/META-INF /home/avwebservice/app/META-INF
+COPY ${DEPENDENCY}/BOOT-INF/classes /home/avwebservice/app
+RUN chown -R 1001:0 /home/avwebservice && \
+    chmod -R g=u /home/avwebservice
 
 USER 1001
 

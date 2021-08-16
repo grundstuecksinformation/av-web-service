@@ -100,7 +100,7 @@ task deleteFilesJarDir(type: Delete) {
 }
 
 task unzipJar(type: Copy) {
-    from zipTree(file("${buildDir}/libs/cadastre-web-service-"+version+".jar"))
+    from zipTree(file("${buildDir}/libs/av-web-service-"+version+".jar"))
     into file("${buildDir}/dependency/")
 }
 unzipJar.dependsOn(deleteFilesJarDir)
@@ -125,16 +125,16 @@ docker {
 }
 
 task pullDockerImage(type: DockerPullImage) {
-    image = "edigonzales/cadastre-web-service:latest"
+    image = "edigonzales/av-web-service:latest"
 }
 
 task buildDockerImage(type: DockerBuildImage) {
     inputDir = project.rootDir
     dockerFile = file("Dockerfile.alpine")
-    images = ["edigonzales/cadastre-web-service:"+version.toString(), "edigonzales/cadastre-web-service:latest"]
-    labels = ["cadastre-web-service.created": new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()), 
-            "cadastre-web-service.git_commit":  getCheckedOutGitCommitHash(), 
-            "cadastre-web-service.travis_build": version.toString()]    
+    images = ["edigonzales/av-web-service:"+version.toString(), "edigonzales/av-web-service:latest"]
+    labels = ["av-web-service.created": new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()), 
+            "av-web-service.git_commit":  getCheckedOutGitCommitHash(), 
+            "av-web-service.travis_build": version.toString()]    
 }
 
 task createDockerContainer(type: DockerCreateContainer) {
@@ -145,7 +145,7 @@ task createDockerContainer(type: DockerCreateContainer) {
 }
 
 task pushDockerImages(type: DockerPushImage) {
-    images = ["edigonzales/cadastre-web-service:"+version.toString(), "edigonzales/cadastre-web-service:latest"]
+    images = ["edigonzales/av-web-service:"+version.toString(), "edigonzales/av-web-service:latest"]
 }
 
 def getCheckedOutGitCommitHash() {
