@@ -50,11 +50,21 @@ import net.sf.saxon.s9api.XdmNode;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpClient.Redirect;
+import java.net.http.HttpClient.Version;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpRequest.Builder;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.ResultSet;
@@ -147,6 +157,9 @@ public class MainController {
     
     @Value("${cadastre.minIntersection:1}")
     private double minIntersection;
+    
+    @Value("${landregPrintService}")
+    private String landregPrintService;
     
     @GetMapping("/")
     public ResponseEntity<String>  ping() {
@@ -276,80 +289,150 @@ public class MainController {
     @GetMapping(value = "/extract/pdf/map/{egrid}", consumes = MediaType.ALL_VALUE, produces = {
             MediaType.APPLICATION_PDF_VALUE })
     public ResponseEntity<?> getMapByEgrid(@PathVariable String egrid) {
-        Grundstueck parcel = getParcelByEgrid(egrid);
-        if (parcel == null) {
-            return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
-        }
-        
-        // TODO config
-        TreeSet<Integer> allowedScaleDenoms = new TreeSet<Integer>() {
-            {
-                add(100);
-                add(150);
-                add(200);
-                add(250);
-                add(500);
-                add(1000);
-                add(2000);
-                add(2500);
-                add(3000);
-                add(4000);
-                add(5000);
-                add(7500);
-                add(10000);
-                add(20000);
-                add(25000);
-                add(50000);
-                add(100000);
-                add(200000);
-                add(250000);
-                add(500000);
-                add(1000000);
-                add(2); // test last()
+        try {
+            Grundstueck parcel = getParcelByEgrid(egrid);
+            if (parcel == null) {
+                return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
             }
-        };
-        
-        // TODO config
-        // A4-hoch
-        double layoutWidth = 0.244;
-        double layoutHeight = 0.196;
-        
-        Geometry geometry = parcel.getGeometrie();
-        Envelope envelope = geometry.getEnvelopeInternal();
-        
-        double width = envelope.getMaxX() - envelope.getMinX();
-        double height = envelope.getMaxY() - envelope.getMinY();
-        double scaleW = layoutWidth / width;
-        double scaleH = layoutHeight / height;
-        boolean scaleFitW = scaleW < scaleH ? true : false;
-        //double scaleDen = 1.0 / Math.min(scaleW, scaleH);
-        double scaleDen = 10000000;
-        
-        Integer c = allowedScaleDenoms.higher((int)scaleDen);
-        System.out.println(c);
-        System.out.println(allowedScaleDenoms.last());
-        
-        logger.info(String.valueOf(scaleW));
-        logger.info(String.valueOf(scaleDen));
-        
-        // 0.244m
-        // 0.196m
-        
-        // 0.186m
-        // 0.287m
-        
-        
-        
-        
-//        logger.info(geometry.toString());
-//        logger.info(geometry.getEnvelopeInternal().get.toString());
-        
-        
-        return null;
+            
+            // TODO config
+            TreeSet<Integer> allowedScaleDenoms = new TreeSet<Integer>() {
+                {
+                    add(100);
+                    add(150);
+                    add(200);
+                    add(250);
+                    add(500);
+                    add(750);
+                    add(1000);
+                    add(2000);
+                    add(2500);
+                    add(3000);
+                    add(4000);
+                    add(5000);
+                    add(7500);
+                    add(10000);
+                    add(20000);
+                    add(25000);
+                    add(50000);
+                    add(100000);
+                    add(200000);
+                    add(250000);
+                    add(500000);
+                    add(1000000);
+                }
+            };
+            
+            // TODO: config
+            TreeSet<Integer> allowedGridInterval = new TreeSet<>() {
+                {
+                    add(10);
+                    add(20);
+                    add(25);
+                    add(50);
+                    add(100);
+                    add(200);
+                    add(250);
+                    add(300);
+                    add(400);
+                    add(500);
+                    add(750);
+                    add(1000);
+                    add(1500);
+                    add(2000);
+                    add(2500);
+                    add(3000);
+                    add(4000);
+                    add(5000);
+                    add(7500);
+                    add(10000);
+                    add(20000);
+                    add(50000);
+                    add(100000);
+                    add(200000);
+                    add(500000);
+                    add(1000000);
+                }
+            };
+            
+            // TODO config
+            // A4-Hoch
+            double layoutWidth = 0.196;
+            double layoutHeight = 0.244;
+            // A4-Quer
+            //double layoutWidth = 0.287;
+            //double layoutHeight = 0.186;
+    
+            Geometry geometry = parcel.getGeometrie();
+            Envelope envelope = geometry.getEnvelopeInternal();
+            
+            double width = envelope.getMaxX() - envelope.getMinX();
+            double height = envelope.getMaxY() - envelope.getMinY();
+            
+            double scaleW = layoutWidth / width;
+            double scaleH = layoutHeight / height;
+            
+            boolean scaleFitW = scaleW < scaleH ? true : false;
+            double scaleDen = 1.0 / Math.min(scaleW, scaleH);
+                    
+            Integer fitScaleDen = allowedScaleDenoms.higher((int)scaleDen);
+            if (fitScaleDen == null) {
+                fitScaleDen = allowedScaleDenoms.last();
+            }
+            
+            double factor = fitScaleDen / scaleDen;
+    
+            double newWidth;
+            double newHeight;
+            if (scaleFitW) {
+                newWidth = factor * width;
+                newHeight = newWidth * layoutHeight / layoutWidth;
+            } else {
+                newHeight = factor * height;
+                newWidth = newHeight * layoutWidth / layoutHeight;
+            }
+            
+            double minX = envelope.centre().x - 0.5 * newWidth;
+            double minY = envelope.centre().y - 0.5 * newHeight;
+            double maxX = envelope.centre().x + 0.5 * newWidth;
+            double maxY = envelope.centre().y + 0.5 * newHeight;
+            
+            logger.info(String.valueOf(newWidth / 3)); 
+            
+            // Circa 4 Gridintervalle sollen auf der Karte sichtbar sein.
+            Integer gridInterval = allowedGridInterval.higher((int)(newWidth / 4));
+            
+            logger.info(String.valueOf(minX));
+            logger.info(String.valueOf(minY));
+            logger.info(String.valueOf(maxX));
+            logger.info(String.valueOf(maxY));
+            
+            String extent = String.valueOf(minX)+","+String.valueOf(minY)+","+String.valueOf(maxX)+","+String.valueOf(maxY);
+            String params = "TEMPLATE=A4-Hoch&scale="+String.valueOf(fitScaleDen)+"&rotation=0&extent="+extent+"&SRS=EPSG%3A2056&GRID_INTERVAL_X="+gridInterval+"&GRID_INTERVAL_Y="+gridInterval+"&DPI=200";
+            
+            String tmpdir = Files.createTempDirectory("cadastralinfo").toFile().getAbsolutePath();        
+            HttpClient httpClient = HttpClient.newBuilder().version(Version.HTTP_1_1).followRedirects(Redirect.ALWAYS)
+                    .build();
+            Builder requestBuilder = HttpRequest.newBuilder();
+            requestBuilder.POST(BodyPublishers.ofString(params)).uri(URI.create(landregPrintService));
+            HttpRequest request = requestBuilder.build();
+            Path pdfFile = Paths.get(tmpdir, egrid + ".pdf");
+            HttpResponse<Path> response = httpClient.send(request, HttpResponse.BodyHandlers.ofFile(pdfFile));
+            
+            InputStream is = new java.io.FileInputStream(pdfFile.toFile());
+            return ResponseEntity
+                    .ok().header("content-disposition", "attachment; filename=" + "karte_" + pdfFile.toFile().getName())
+                    .contentLength(pdfFile.toFile().length())
+                    .contentType(MediaType.APPLICATION_PDF).body(new InputStreamResource(is));                
+        } catch (FileNotFoundException e) {
+            throw new IllegalStateException(e);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        } catch (InterruptedException e) {
+            throw new IllegalStateException(e);
+        }
     }
-    
-    
-    
+        
 	@GetMapping(value = "/extract/{format}/geometry/{egrid}", consumes = MediaType.ALL_VALUE, produces = {
 			MediaType.APPLICATION_PDF_VALUE, MediaType.APPLICATION_XML_VALUE })
 	public ResponseEntity<?> getExtractWithGeometryByEgrid(@PathVariable String format, @PathVariable String egrid, @RequestParam(value="WITHIMAGES", required=false) String withImagesParam) {

@@ -45,6 +45,8 @@ curl -X GET -H "Accept: application/xml" -H "Content-Type: application/xml" http
 curl -X GET -H "Accept: application/xml" -H "Content-Type: application/xml" http://localhost:8080/getegrid/xml/?XY=2600466,1215406 > response.xml && xmllint --format response.xml
 curl -X GET -H "Accept: application/xml" -H "Content-Type: application/xml" http://localhost:8080/getegrid/xml/SO0200002457/452/ > response.xml && xmllint --format response.xml
 curl -X GET -H "Accept: application/xml" -H "Content-Type: application/xml" http://localhost:8080/extract/xml/geometry/CH955832730623 > response.xml && xmllint --format response.xml
+
+http://localhost:8081/extract/pdf/map/CH233274062061
 ```
 
 ### xml2pdf 
