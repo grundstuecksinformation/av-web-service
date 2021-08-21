@@ -400,8 +400,8 @@ public class MainController {
             
             logger.info(String.valueOf(newWidth / 3)); 
             
-            // Circa 4 Gridintervalle sollen auf der Karte sichtbar sein.
-            Integer gridInterval = allowedGridInterval.higher((int)(newWidth / 4));
+            // Circa x Gridintervalle sollen auf der Karte sichtbar sein.
+            Integer gridInterval = allowedGridInterval.higher((int)(newWidth / 3));
             
             logger.info(String.valueOf(minX));
             logger.info(String.valueOf(minY));
