@@ -97,6 +97,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ByteOrderValues;
@@ -682,7 +683,7 @@ public class MainController {
                 "    ON fl.flaechenelement_von = eo.t_id \n" + 
                 "    LEFT JOIN "+getSchema()+"."+TABLE_DM01VCH24LV95DEINZELOBJEKTE_OBJEKTNUMMER+" AS eonr\n" + 
                 "    ON eonr.objektnummer_von = eo.t_id";
-               
+        
         List<BuildingType> gebaeudeList = jdbcTemplate.query(stmt, new RowMapper<BuildingType>() {
             WKBReader decoder=new WKBReader(geomFactory);
 
@@ -736,6 +737,10 @@ public class MainController {
                 } else {
                     gebaeude.setAreaShare(intersectionArea);
                 }
+                Polygon[] polygons = new Polygon[] {(Polygon)gebaeudeGeometry};
+                MultiPolygon mpolygon = geomFactory.createMultiPolygon(polygons);
+                
+                gebaeude.setGeometry(mpolygon.toText());
  
                 byte gebaeudeWkbGeometry[] = geomEncoder.write(gebaeudeGeometry);
 

@@ -163,11 +163,11 @@
 			<xsd:element name="Egid" type="xsd:int" minOccurs="0"
 				maxOccurs="1">
 			</xsd:element>
-			<xsd:element name="planned" type="xsd:boolean"
-				minOccurs="1" maxOccurs="1">
+			<xsd:element name="planned" type="xsd:boolean" minOccurs="1"
+				maxOccurs="1">
 			</xsd:element>
-			<xsd:element name="undergroundStructure"
-				type="xsd:boolean" minOccurs="1" maxOccurs="1">
+			<xsd:element name="undergroundStructure" type="xsd:boolean"
+				minOccurs="1" maxOccurs="1">
 			</xsd:element>
 			<xsd:element name="Area" type="xsd:double" minOccurs="0"
 				maxOccurs="1">
@@ -176,7 +176,10 @@
 				minOccurs="0" maxOccurs="1">
 			</xsd:element>
 			<xsd:element name="BuildingEntry"
-				type="extract:BuildingEntryType" minOccurs="0" maxOccurs="unbounded"></xsd:element>
+				type="extract:BuildingEntryType" minOccurs="0"
+				maxOccurs="unbounded">
+			</xsd:element>
+			<xsd:element name="Geometry" type="xsd:normalizedString" minOccurs="0" maxOccurs="1"></xsd:element>
 		</xsd:sequence>
 	</xsd:complexType>
 
